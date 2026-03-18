@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dompis_app/core/theme.dart';
 import 'package:dompis_app/data/models/ticket.dart';
 import 'package:dompis_app/providers/api_providers.dart';
-import 'package:dompis_app/providers/auth_provider.dart';
+
 import 'package:dompis_app/widgets/stat_card.dart';
 import 'package:dompis_app/widgets/ticket_card.dart';
 
@@ -61,45 +61,31 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surfaceLight,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadData,
-          child: CustomScrollView(
-            slivers: [
-              // Header
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Admin Dashboard',
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary)),
-                          SizedBox(height: 2),
-                          Text('Monitor & manage tickets',
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.textSecondary)),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: () =>
-                            ref.read(authProvider.notifier).logout(),
-                        icon: const Icon(Icons.logout_rounded,
-                            color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      child: CustomScrollView(
+        slivers: [
+          // Header
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('Admin Dashboard',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary)),
+                  SizedBox(height: 2),
+                  Text('Monitor & manage tickets',
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary)),
+                ],
               ),
+            ),
+          ),
 
               // Stats
               SliverToBoxAdapter(
@@ -186,8 +172,6 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           ),
-        ),
-      ),
     );
   }
 }

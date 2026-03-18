@@ -3,12 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dompis_app/providers/auth_provider.dart';
 import 'package:dompis_app/screens/login/login_screen.dart';
-import 'package:dompis_app/screens/teknisi/teknisi_dashboard.dart';
+
+// Teknisi
+import 'package:dompis_app/screens/teknisi/teknisi_shell.dart';
 import 'package:dompis_app/screens/teknisi/ticket_detail_screen.dart';
-import 'package:dompis_app/screens/teknisi/attendance_screen.dart';
+
+// Admin
+import 'package:dompis_app/screens/admin/admin_shell.dart';
 import 'package:dompis_app/screens/admin/admin_dashboard.dart';
+import 'package:dompis_app/screens/admin/admin_semesta_screen.dart';
+import 'package:dompis_app/screens/admin/admin_technicians_screen.dart';
+import 'package:dompis_app/screens/admin/admin_tech_subpages.dart';
+
+// Helpdesk
+import 'package:dompis_app/screens/helpdesk/helpdesk_shell.dart';
 import 'package:dompis_app/screens/helpdesk/helpdesk_dashboard.dart';
+
+// Superadmin
+import 'package:dompis_app/screens/superadmin/superadmin_shell.dart';
 import 'package:dompis_app/screens/superadmin/superadmin_dashboard.dart';
+
+// Shared
+import 'package:dompis_app/widgets/profile_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -37,10 +53,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
 
-      // Teknisi routes
+      // ─── Teknisi ───────────────────────────────────────────────
       GoRoute(
         path: '/teknisi',
-        builder: (context, state) => const TeknisiDashboard(),
+        builder: (context, state) => const TeknisiShell(),
       ),
       GoRoute(
         path: '/teknisi/ticket/:id',
@@ -49,27 +65,88 @@ final routerProvider = Provider<GoRouter>((ref) {
           return TicketDetailScreen(ticketId: id);
         },
       ),
-      GoRoute(
-        path: '/teknisi/attendance',
-        builder: (context, state) => const AttendanceScreen(),
-      ),
 
-      // Admin routes
+      // ─── Admin ─────────────────────────────────────────────────
       GoRoute(
         path: '/admin',
-        builder: (context, state) => const AdminDashboard(),
+        builder: (context, state) => AdminShell(
+          currentRoute: '/admin',
+          child: const AdminDashboard(),
+        ),
+      ),
+      GoRoute(
+        path: '/admin/semesta',
+        builder: (context, state) => AdminShell(
+          currentRoute: '/admin/semesta',
+          child: const AdminSemestaScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/admin/technicians',
+        builder: (context, state) => AdminShell(
+          currentRoute: '/admin/technicians',
+          child: const AdminTechniciansScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/admin/technicians/attendance',
+        builder: (context, state) => AdminShell(
+          currentRoute: '/admin/technicians',
+          child: const AdminTechAttendanceScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/admin/technicians/performance',
+        builder: (context, state) => AdminShell(
+          currentRoute: '/admin/technicians',
+          child: const AdminTechPerformanceScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/admin/technicians/manhours',
+        builder: (context, state) => AdminShell(
+          currentRoute: '/admin/technicians',
+          child: const AdminTechManhoursScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/admin/profile',
+        builder: (context, state) => AdminShell(
+          currentRoute: '/admin/profile',
+          child: const ProfilePage(),
+        ),
       ),
 
-      // Helpdesk routes
+      // ─── Helpdesk ──────────────────────────────────────────────
       GoRoute(
         path: '/helpdesk',
-        builder: (context, state) => const HelpdeskDashboard(),
+        builder: (context, state) => HelpdeskShell(
+          currentRoute: '/helpdesk',
+          child: const HelpdeskDashboard(),
+        ),
+      ),
+      GoRoute(
+        path: '/helpdesk/profile',
+        builder: (context, state) => HelpdeskShell(
+          currentRoute: '/helpdesk/profile',
+          child: const ProfilePage(),
+        ),
       ),
 
-      // Superadmin routes
+      // ─── Superadmin ────────────────────────────────────────────
       GoRoute(
         path: '/superadmin',
-        builder: (context, state) => const SuperadminDashboard(),
+        builder: (context, state) => SuperadminShell(
+          currentRoute: '/superadmin',
+          child: const SuperadminDashboard(),
+        ),
+      ),
+      GoRoute(
+        path: '/superadmin/profile',
+        builder: (context, state) => SuperadminShell(
+          currentRoute: '/superadmin/profile',
+          child: const ProfilePage(),
+        ),
       ),
     ],
   );
