@@ -1,7 +1,7 @@
 name: dompis_app
 description: "DOMPIS Ticket Management App"
 publish_to: 'none'
-version: 1.0.1+1
+version: 1.0.2+1
 
 environment:
   sdk: ^3.11.1
@@ -28,3 +28,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"

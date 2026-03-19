@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dompis.dompis_app"
+    namespace = "com.dompis.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

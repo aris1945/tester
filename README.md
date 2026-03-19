@@ -32,6 +32,7 @@ Aplikasi mobile **DOMPIS** (Ticket Management System) dibangun menggunakan **Flu
 | **Image Picker** | ^1.1.2 | Upload bukti foto |
 | **Intl** | ^0.19.0 | Format tanggal & waktu |
 | **URL Launcher** | ^6.3.1 | Buka link eksternal |
+| **Shared Preferences** | ^2.5.4 | Penyimpanan setting lokal |
 
 ---
 
@@ -51,20 +52,20 @@ Aplikasi mobile **DOMPIS** (Ticket Management System) dibangun menggunakan **Flu
 - Absensi masuk/keluar (check-in/check-out)
 
 ### 🛡 Admin
-- Dashboard overview statistik tiket
+- Dashboard overview statistik tiket dengan visualisasi high-fidelity (Next.js style)
+- Filter tiket canggih (Workzone, Jenis, Status, Flagging)
+- Management penugasan teknisi (Assign/Reassign/Unassign) melalui bottom sheet interaktif
+- Monitoring tiket B2C (Reguler, Gold, Platinum, Diamond) dan B2B (CCAN, Indibiz, Datin, dll)
+- Menu Semesta untuk monitoring tiket harian seluruh area
 
-### 📞 Helpdesk
-- Dashboard monitoring tiket
+### 🎨 Tampilan & Tema
+- **Dynamic Dark/Light Mode**: Mendukung perubahan tema secara runtime
+- **Slate Aesthetic**: Replikasi visual dari project Next.js original
+- **Persistent Theme**: Pilihan tema tersimpan otomatis (SharedPreferences)
+- Custom theme extension untuk color system (status, customer type)
+- Reusable widgets (StatCard, TicketCard, AppDrawer)
+- Animasi premium pada login screen dan transisi filter
 
-### 👑 Superadmin
-- Dashboard lengkap seluruh sistem
-
-### 🎨 UI/UX
-- Material Design 3
-- Custom theme dengan color system (status, customer type)
-- Reusable widgets (StatCard, TicketCard)
-- Animasi login screen
-- Dark gradient login page
 
 ---
 
@@ -109,7 +110,7 @@ lib/
 │
 ├── core/
 │   ├── constants.dart                 # API base URL & endpoint paths
-│   ├── theme.dart                     # AppColors, AppTheme (Material 3)
+│   ├── theme.dart                     # Dynamic ThemeExtension & AppTheme
 │   └── utils.dart                     # Helper functions (format tanggal, dll)
 │
 ├── data/
@@ -130,6 +131,7 @@ lib/
 │
 ├── providers/
 │   ├── auth_provider.dart             # AuthNotifier (login, logout, checkAuth)
+│   ├── theme_provider.dart            # persistent ThemeMode notifier
 │   └── api_providers.dart             # Riverpod providers untuk semua API
 │
 ├── screens/
@@ -140,7 +142,8 @@ lib/
 │   │   ├── ticket_detail_screen.dart  # Detail tiket + upload bukti
 │   │   └── attendance_screen.dart     # Halaman absensi
 │   ├── admin/
-│   │   └── admin_dashboard.dart       # Dashboard admin
+│   │   ├── admin_dashboard.dart       # Dashboard utama admin (B2C/B2B tabs)
+│   └── admin_semesta_screen.dart  # Monitoring tiket harian seluruh area
 │   ├── helpdesk/
 │   │   └── helpdesk_dashboard.dart    # Dashboard helpdesk
 │   └── superadmin/
@@ -148,7 +151,9 @@ lib/
 │
 └── widgets/
     ├── stat_card.dart                 # Widget kartu statistik
-    └── ticket_card.dart               # Widget kartu tiket
+    ├── ticket_card.dart               # Widget kartu tiket
+    ├── app_drawer.dart                # Sidebar navigasi global + theme toggle
+    └── assign_technician_modal.dart   # Bottom sheet penugasan teknisi
 ```
 
 ---
@@ -230,6 +235,8 @@ Base URL: `https://dompis.ta-branchsby.co.id`
 | POST | `/api/tickets/update` | Update tiket |
 | POST | `/api/tickets/pickup` | Ambil tiket |
 | POST | `/api/tickets/close` | Tutup tiket |
+| POST | `/api/tickets/assign` | Penugasan teknisi |
+| POST | `/api/tickets/unassign` | Hapus penugasan teknisi |
 | POST | `/api/tickets/upload-evidence` | Upload bukti foto |
 
 ### Users
