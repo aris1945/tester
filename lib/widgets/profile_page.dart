@@ -5,6 +5,7 @@ import 'package:dompis_app/core/constants.dart';
 import 'package:dompis_app/providers/api_providers.dart';
 import 'package:dompis_app/providers/auth_provider.dart';
 import 'package:dompis_app/widgets/logout_confirm_dialog.dart';
+import 'package:dompis_app/widgets/change_password_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -16,8 +17,9 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   Map<String, dynamic>? _user;
+  String? _username;
   bool _loading = true;
-  String? _error;
+  String? _error = null;
 
   @override
   void initState() {
@@ -33,12 +35,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     try {
       final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.dio.get(ApiConstants.usersMe);
+      final tokenStorage = ref.read(tokenStorageProvider);
+      
+      final results = await Future.wait([
+        apiClient.dio.get(ApiConstants.usersMe),
+        tokenStorage.getUsername(),
+      ]);
+
+      final response = results[0] as dynamic; // Dio Response
+      final storedUsername = results[1] as String?;
+      
       final data = response.data as Map<String, dynamic>;
 
       if (data['success'] == true) {
         setState(() {
           _user = data['data'] as Map<String, dynamic>?;
+          _username = storedUsername ?? _user?['username'];
           _loading = false;
         });
       } else {
@@ -95,7 +107,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
 
     final name = _user?['nama'] ?? _user?['username'] ?? 'User';
-    final username = _user?['username'] ?? '-';
+    final username = _username ?? _user?['username'] ?? '-';
     final role = _user?['role_name'] ?? '-';
     final position = _user?['jabatan'] ?? '-';
     final initials = name
@@ -141,10 +153,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Center(
             child: Text(
               name.toString(),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: context.themeColors.textPrimary,
+                letterSpacing: -0.5,
               ),
             ),
           ),
@@ -170,15 +183,45 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: 32),
 
           // Info Cards
-          _buildInfoCard(Icons.person_outline, 'Nama', name.toString()),
           _buildInfoCard(
-            Icons.location_on_outlined,
+            Icons.alternate_email_rounded,
+            'Username',
+            username.toString(),
+          ),
+          _buildInfoCard(
+            Icons.work_outline_rounded,
             'Jabatan',
             position.toString(),
           ),
-          _buildInfoCard(Icons.badge_outlined, 'Role', role.toString()),
 
           const SizedBox(height: 32),
+
+          // Change password button
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton.icon(
+              onPressed: () => ChangePasswordDialog.show(context),
+              icon: const Icon(Icons.lock_reset_rounded, color: Colors.white),
+              label: const Text(
+                'Ganti Password',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
 
           // Logout button
           SizedBox(
@@ -214,9 +257,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight),
+        color: context.themeColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.themeColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -236,20 +286,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textMuted,
-                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w700,
+                    color: context.themeColors.textMuted,
+                    letterSpacing: 0.8,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.themeColors.textPrimary,
                   ),
                 ),
               ],

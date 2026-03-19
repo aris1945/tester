@@ -6,9 +6,11 @@ import 'package:dompis_app/providers/auth_provider.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dompis_app/providers/theme_provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
   final prefs = await SharedPreferences.getInstance();
 
   runApp(ProviderScope(

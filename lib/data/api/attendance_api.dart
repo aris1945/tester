@@ -26,10 +26,13 @@ class AttendanceApi {
   }
 
   /// Check out
-  Future<Map<String, dynamic>> checkOut() async {
+  Future<Map<String, dynamic>> checkOut(int workzoneId) async {
     final response = await _dio.post(
       ApiConstants.attendance,
-      data: {'action': 'check_out'},
+      data: {
+        'action': 'check_out',
+        'workzone_id': workzoneId,
+      },
     );
     return response.data as Map<String, dynamic>;
   }

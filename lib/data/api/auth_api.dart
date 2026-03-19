@@ -24,6 +24,9 @@ class AuthApi {
       // Store tokens
       final accessToken = data['accessToken'] as String;
       await _tokenStorage.saveAccessToken(accessToken);
+      
+      // Store username
+      await _tokenStorage.saveUsername(username);
 
       // Store role
       final role = data['role'] as String? ?? '';
@@ -45,6 +48,20 @@ class AuthApi {
 
   Future<Map<String, dynamic>> getCurrentUser() async {
     final response = await _dio.get(ApiConstants.usersMe);
+    return response.data as Map<String, dynamic>;
+  }
+  
+  Future<Map<String, dynamic>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final response = await _dio.post(
+      ApiConstants.changePassword,
+      data: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+    );
     return response.data as Map<String, dynamic>;
   }
 }

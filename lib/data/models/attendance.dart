@@ -54,6 +54,7 @@ class TodayAttendanceStatus {
   final String? checkInAt;
   final String? checkOutAt;
   final String? status;
+  final int? workzoneId;
 
   TodayAttendanceStatus({
     this.checkedIn = false,
@@ -61,6 +62,7 @@ class TodayAttendanceStatus {
     this.checkInAt,
     this.checkOutAt,
     this.status,
+    this.workzoneId,
   });
 
   factory TodayAttendanceStatus.fromJson(Map<String, dynamic> json) {
@@ -70,6 +72,7 @@ class TodayAttendanceStatus {
       checkInAt: json['check_in_at'] as String?,
       checkOutAt: json['check_out_at'] as String?,
       status: json['status'] as String?,
+      workzoneId: json['workzone_id'] as int?,
     );
   }
 }

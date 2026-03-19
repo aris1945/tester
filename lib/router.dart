@@ -7,6 +7,7 @@ import 'package:dompis_app/screens/login/login_screen.dart';
 // Teknisi
 import 'package:dompis_app/screens/teknisi/teknisi_shell.dart';
 import 'package:dompis_app/screens/teknisi/ticket_detail_screen.dart';
+import 'package:dompis_app/screens/teknisi/attendance_check_screen.dart';
 
 // Admin
 import 'package:dompis_app/screens/admin/admin_shell.dart';
@@ -42,7 +43,19 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Logged in and on login page → redirect to role dashboard
       if (isLoggedIn && isLoginRoute) {
+        // For technicians, check if attendance is needed
+        if (authState.role == 'teknisi' && authState.needsAttendanceCheck) {
+          return '/teknisi/check-in';
+        }
         return _getDashboardRoute(authState.role);
+      }
+
+      // Enforce attendance check for technicians
+      if (isLoggedIn &&
+          authState.role == 'teknisi' &&
+          authState.needsAttendanceCheck &&
+          state.matchedLocation != '/teknisi/check-in') {
+        return '/teknisi/check-in';
       }
 
       return null; // No redirect
@@ -64,6 +77,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final id = int.parse(state.pathParameters['id']!);
           return TicketDetailScreen(ticketId: id);
         },
+      ),
+      GoRoute(
+        path: '/teknisi/check-in',
+        builder: (context, state) => const AttendanceCheckScreen(),
       ),
 
       // ─── Admin ─────────────────────────────────────────────────

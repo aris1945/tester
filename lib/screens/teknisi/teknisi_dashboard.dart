@@ -8,6 +8,7 @@ import 'package:dompis_app/providers/auth_provider.dart';
 import 'package:dompis_app/widgets/ticket_card.dart';
 import 'package:dompis_app/widgets/stat_card.dart';
 import 'package:dompis_app/providers/theme_provider.dart';
+import 'package:dompis_app/widgets/logout_confirm_dialog.dart';
 
 // Ticket filter tabs (matching the web app)
 enum TicketFilter { all, assigned, onProgress, pending, closed }
@@ -54,16 +55,17 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
     setState(() => _loading = true);
     try {
       final ticketApi = ref.read(ticketApiProvider);
-      final data =
-          await ticketApi.getTickets(limit: 100);
+      final data = await ticketApi.getTickets(limit: 100);
 
       if (data['success'] == true) {
-        final list = data['data']?['data'] as List<dynamic>? ??
+        final list =
+            data['data']?['data'] as List<dynamic>? ??
             data['data'] as List<dynamic>? ??
             [];
         setState(() {
-          _tickets =
-              list.map((e) => Ticket.fromJson(e as Map<String, dynamic>)).toList();
+          _tickets = list
+              .map((e) => Ticket.fromJson(e as Map<String, dynamic>))
+              .toList();
         });
       }
     } catch (e) {
@@ -112,7 +114,9 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
     final filtered = filteredTickets;
     if (start >= filtered.length) return [];
     return filtered.sublist(
-        start, end > filtered.length ? filtered.length : end);
+      start,
+      end > filtered.length ? filtered.length : end,
+    );
   }
 
   int get totalPages => (filteredTickets.length / _pageSize).ceil();
@@ -121,10 +125,14 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
     int assigned = 0, onProgress = 0, pending = 0, closed = 0;
     for (final t in _tickets) {
       final s = t.effectiveStatus;
-      if (s == 'ASSIGNED') assigned++;
-      else if (s == 'ON_PROGRESS') onProgress++;
-      else if (s == 'PENDING') pending++;
-      else if (s == 'CLOSE' || s == 'CLOSED') closed++;
+      if (s == 'ASSIGNED')
+        assigned++;
+      else if (s == 'ON_PROGRESS')
+        onProgress++;
+      else if (s == 'PENDING')
+        pending++;
+      else if (s == 'CLOSE' || s == 'CLOSED')
+        closed++;
     }
     return {
       'total': _tickets.length,
@@ -175,21 +183,27 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                       Row(
                         children: [
                           // Attendance button
-                          _buildIconButton(
-                            context: context,
-                            icon: Icons.access_time_rounded,
-                            onTap: () => context.push('/teknisi/attendance'),
-                          ),
-                          const SizedBox(width: 8),
+                          // _buildIconButton(
+                          //   context: context,
+                          //   icon: Icons.access_time_rounded,
+                          //   onTap: () => ref.read(teknisiNavIndexProvider.notifier).state = 1,
+                          // ),
+                          // const SizedBox(width: 8),
                           // Theme Toggle
                           Consumer(
                             builder: (context, ref, child) {
                               final mode = ref.watch(themeProvider);
                               return _buildIconButton(
                                 context: context,
-                                icon: mode == ThemeMode.dark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                color: mode == ThemeMode.dark ? Colors.amber : context.themeColors.textPrimary,
-                                onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+                                icon: mode == ThemeMode.dark
+                                    ? Icons.wb_sunny_rounded
+                                    : Icons.nightlight_round,
+                                color: mode == ThemeMode.dark
+                                    ? Colors.amber
+                                    : context.themeColors.textPrimary,
+                                onTap: () => ref
+                                    .read(themeProvider.notifier)
+                                    .toggleTheme(),
                               );
                             },
                           ),
@@ -198,8 +212,12 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                           _buildIconButton(
                             context: context,
                             icon: Icons.logout_rounded,
-                            onTap: () {
-                              ref.read(authProvider.notifier).logout();
+                            onTap: () async {
+                              final confirmed = await LogoutConfirmDialog.show(context);
+                              if (confirmed == true && mounted) {
+                                await ref.read(authProvider.notifier).logout();
+                                if (mounted) context.go('/login');
+                              }
                             },
                           ),
                         ],
@@ -272,22 +290,29 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                         color: context.themeColors.textMuted,
                         fontSize: 13,
                       ),
-                      prefixIcon: Icon(Icons.search, size: 20,
-                          color: context.themeColors.textMuted),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        size: 20,
+                        color: context.themeColors.textMuted,
+                      ),
                       filled: true,
                       fillColor: context.themeColors.card,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide:
-                            BorderSide(color: context.themeColors.border),
+                        borderSide: BorderSide(
+                          color: context.themeColors.border,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide:
-                            BorderSide(color: context.themeColors.border),
+                        borderSide: BorderSide(
+                          color: context.themeColors.border,
+                        ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -314,7 +339,9 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: isActive
                                     ? AppColors.primary
@@ -349,9 +376,7 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
               if (_loading)
                 const SliverFillRemaining(
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 )
               else if (filteredTickets.isEmpty)
@@ -393,22 +418,18 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final ticket = paginatedTickets[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: TicketCard(
-                            ticket: ticket,
-                            onTap: () {
-                              context.push(
-                                  '/teknisi/ticket/${ticket.idTicket}');
-                            },
-                          ),
-                        );
-                      },
-                      childCount: paginatedTickets.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final ticket = paginatedTickets[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: TicketCard(
+                          ticket: ticket,
+                          onTap: () {
+                            context.push('/teknisi/ticket/${ticket.idTicket}');
+                          },
+                        ),
+                      );
+                    }, childCount: paginatedTickets.length),
                   ),
                 ),
 
@@ -471,7 +492,11 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
             border: Border.all(color: context.themeColors.border),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, size: 20, color: color ?? context.themeColors.textSecondary),
+          child: Icon(
+            icon,
+            size: 20,
+            color: color ?? context.themeColors.textSecondary,
+          ),
         ),
       ),
     );

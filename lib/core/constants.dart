@@ -5,6 +5,7 @@ class ApiConstants {
   static const String login = '/api/auth/login';
   static const String refresh = '/api/auth/refresh';
   static const String logout = '/api/auth/logout';
+  static const String changePassword = '/api/auth/change-password';
 
   // Tickets
   static const String tickets = '/api/tickets';

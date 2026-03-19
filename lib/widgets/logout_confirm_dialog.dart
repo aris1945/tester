@@ -24,20 +24,29 @@ class LogoutConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Row(
+      backgroundColor: context.themeColors.card,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: context.themeColors.border),
+      ),
+      title: Row(
         children: [
-          Icon(Icons.logout_rounded, color: Colors.red, size: 24),
-          SizedBox(width: 10),
+          const Icon(Icons.logout_rounded, color: Colors.red, size: 24),
+          const SizedBox(width: 10),
           Text(
             'Keluar dari aplikasi?',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: context.themeColors.textPrimary,
+            ),
           ),
         ],
       ),
-      content: const Text(
+      content: Text(
         'Anda harus login kembali untuk mengakses aplikasi.',
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        style: TextStyle(color: context.themeColors.textSecondary, fontSize: 14),
       ),
       actions: [
         TextButton(
@@ -45,7 +54,7 @@ class LogoutConfirmDialog extends StatelessWidget {
           child: Text(
             'Batal',
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: context.themeColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),

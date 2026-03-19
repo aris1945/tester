@@ -87,11 +87,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
     }
   }
-
   /// Logout
   Future<void> logout() async {
     await _authApi.logout();
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  /// Mark attendance as checked for the current session
+  void markAttendanceChecked() {
+    state = state.copyWith(needsAttendanceCheck: false);
   }
 }
 

@@ -63,6 +63,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       final api = ref.read(attendanceApiProvider);
       final data = await api.checkIn(_selectedWorkzoneId!);
       if (data['success'] == true) {
+        // Save ID locally for check-out later
+        final tokenStorage = ref.read(tokenStorageProvider);
+        await tokenStorage.saveActiveWorkzoneId(_selectedWorkzoneId!);
+        
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -90,10 +94,22 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   }
 
   Future<void> _checkOut() async {
+    final tokenStorage = ref.read(tokenStorageProvider);
+    int? workzoneId = _status?.workzoneId ?? await tokenStorage.getActiveWorkzoneId();
+
+    if (workzoneId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: Workzone ID tidak ditemukan')),
+        );
+      }
+      return;
+    }
+    
     setState(() => _actionLoading = true);
     try {
       final api = ref.read(attendanceApiProvider);
-      final data = await api.checkOut();
+      final data = await api.checkOut(workzoneId);
       if (data['success'] == true) {
         await _loadData();
         if (mounted) {
@@ -124,13 +140,23 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceLight,
+      backgroundColor: context.themeColors.surface,
       appBar: AppBar(
-        title: const Text('Absensi',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        backgroundColor: Colors.white,
+        title: Text('Absensi',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: context.themeColors.textPrimary)),
+        backgroundColor: context.themeColors.card,
         surfaceTintColor: Colors.transparent,
-        elevation: 0.5,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: context.themeColors.border,
+            height: 1,
+          ),
+        ),
       ),
       body: _loading
           ? const Center(
@@ -229,31 +255,40 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.themeColors.card,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderLight),
+                        border: Border.all(color: context.themeColors.border),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Pilih Workzone',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
+                              color: context.themeColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 12),
                           DropdownButtonFormField<int>(
                             value: _selectedWorkzoneId,
+                            dropdownColor: context.themeColors.card,
                             decoration: InputDecoration(
+                              filled: true,
+                              fillColor: context.themeColors.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: context.themeColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: context.themeColors.border),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 12),
                             ),
+                            style: TextStyle(color: context.themeColors.textPrimary),
                             items: _serviceAreas.map((sa) {
                               return DropdownMenuItem<int>(
                                 value: sa.idSa,
@@ -312,21 +347,21 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.themeColors.card,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderLight),
+                        border: Border.all(color: context.themeColors.border),
                       ),
-                      child: const Column(
+                      child: Column(
                         children: [
-                          Text('✅',
+                          const Text('✅',
                               style: TextStyle(fontSize: 40)),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             'Anda sudah check-out hari ini',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
+                              color: context.themeColors.textSecondary,
                             ),
                           ),
                         ],
