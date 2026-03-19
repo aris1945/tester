@@ -4,6 +4,7 @@ import 'package:dompis_app/core/theme.dart';
 import 'package:dompis_app/data/models/ticket.dart';
 import 'package:dompis_app/providers/api_providers.dart';
 import 'package:dompis_app/widgets/stat_card.dart';
+import 'package:dompis_app/providers/theme_provider.dart';
 
 class SuperadminDashboard extends ConsumerStatefulWidget {
   const SuperadminDashboard({super.key});
@@ -69,17 +70,39 @@ class _SuperadminDashboardState extends ConsumerState<SuperadminDashboard> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('Superadmin',
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary)),
-                  SizedBox(height: 2),
-                  Text('System overview',
-                      style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary)),
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Superadmin',
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w800,
+                                  color: context.themeColors.textPrimary)),
+                          const SizedBox(height: 2),
+                          Text('System overview',
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.themeColors.textSecondary)),
+                        ],
+                      ),
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final mode = ref.watch(themeProvider);
+                          return IconButton(
+                            icon: Icon(
+                              mode == ThemeMode.dark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                              color: mode == ThemeMode.dark ? Colors.amber : context.themeColors.textPrimary,
+                            ),
+                            onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -121,14 +144,14 @@ class _SuperadminDashboardState extends ConsumerState<SuperadminDashboard> {
             ),
           ),
 
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, 24, 20, 10),
               child: Text('Recent Tickets',
                   style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary)),
+                      color: context.themeColors.textPrimary)),
             ),
           ),
 
@@ -149,10 +172,10 @@ class _SuperadminDashboardState extends ConsumerState<SuperadminDashboard> {
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.themeColors.card,
                         borderRadius: BorderRadius.circular(14),
                         border:
-                            Border.all(color: AppColors.borderLight),
+                            Border.all(color: context.themeColors.border),
                       ),
                       child: Row(
                         children: [
@@ -163,19 +186,19 @@ class _SuperadminDashboardState extends ConsumerState<SuperadminDashboard> {
                               children: [
                                 Text(
                                   ticket.ticket,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     fontFamily: 'monospace',
-                                    color: AppColors.textPrimary,
+                                    color: context.themeColors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   ticket.contactName ?? '-',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    color: context.themeColors.textSecondary,
                                   ),
                                 ),
                               ],

@@ -1,6 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
+  final Color surface;
+  final Color card;
+  final Color border;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+
+  const AppColorsExtension({
+    required this.surface,
+    required this.card,
+    required this.border,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+  });
+
+  @override
+  AppColorsExtension copyWith({
+    Color? surface, Color? card, Color? border, Color? textPrimary, Color? textSecondary, Color? textMuted,
+  }) {
+    return AppColorsExtension(
+      surface: surface ?? this.surface,
+      card: card ?? this.card,
+      border: border ?? this.border,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      textMuted: textMuted ?? this.textMuted,
+    );
+  }
+
+  @override
+  AppColorsExtension lerp(ThemeExtension<AppColorsExtension>? other, double t) {
+    if (other is! AppColorsExtension) return this;
+    return AppColorsExtension(
+      surface: Color.lerp(surface, other.surface, t)!,
+      card: Color.lerp(card, other.card, t)!,
+      border: Color.lerp(border, other.border, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      textMuted: Color.lerp(textMuted, other.textMuted, t)!,
+    );
+  }
+}
+
+extension AppThemeContext on BuildContext {
+  AppColorsExtension get themeColors => Theme.of(this).extension<AppColorsExtension>()!;
+}
+
 class AppColors {
   // Primary
   static const Color primary = Color(0xFF3B82F6);
@@ -97,6 +146,92 @@ class AppTheme {
           ),
         ),
       ),
+      extensions: const [
+        AppColorsExtension(
+          surface: AppColors.surfaceLight,
+          card: AppColors.cardLight,
+          border: AppColors.borderLight,
+          textPrimary: AppColors.textPrimary,
+          textSecondary: AppColors.textSecondary,
+          textMuted: AppColors.textMuted,
+        )
+      ],
+    );
+  }
+
+  static ThemeData get dark {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.dark,
+        surface: AppColors.surfaceDark,
+      ),
+      scaffoldBackgroundColor: AppColors.surfaceDark,
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.cardDark,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.cardDark,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.borderDark),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceDark,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderDark),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderDark),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      extensions: const [
+        AppColorsExtension(
+          surface: AppColors.surfaceDark,
+          card: AppColors.cardDark,
+          border: AppColors.borderDark,
+          textPrimary: Colors.white,
+          textSecondary: AppColors.textMuted, // flipped
+          textMuted: AppColors.textSecondary, // flipped 
+        )
+      ],
     );
   }
 }

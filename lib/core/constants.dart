@@ -14,6 +14,8 @@ class ApiConstants {
   static const String ticketsUpdate = '/api/tickets/update';
   static const String ticketsPickup = '/api/tickets/pickup';
   static const String ticketsClose = '/api/tickets/close';
+  static const String ticketsAssign = '/api/tickets/assign';
+  static const String ticketsUnassign = '/api/tickets/unassign';
   static const String ticketsUploadEvidence = '/api/tickets/upload-evidence';
 
   static String ticketDetail(int id) => '/api/tickets/$id/detail';
@@ -30,6 +32,8 @@ class ApiConstants {
   static String technicianById(int id) => '/api/technicians/$id';
   static const String attendanceStatus = '/api/technicians/attendance/status';
   static const String attendance = '/api/technicians/attendance';
+  static const String techniciansPerformance = '/api/technicians/performance';
+  static const String techniciansManhours = '/api/technicians/manhours';
 
   // Dashboard
   static const String dashboardStats = '/api/dashboard/stats';

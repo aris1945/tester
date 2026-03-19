@@ -98,6 +98,30 @@ class TicketApi {
     return response.data as Map<String, dynamic>;
   }
 
+  /// Assign a ticket to a technician
+  Future<Map<String, dynamic>> assignTicket({
+    required int ticketId,
+    required int teknisiUserId,
+  }) async {
+    final response = await _dio.post(
+      ApiConstants.ticketsAssign,
+      data: {
+        'ticketId': ticketId,
+        'teknisiUserId': teknisiUserId,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Unassign a ticket
+  Future<Map<String, dynamic>> unassignTicket(int ticketId) async {
+    final response = await _dio.post(
+      ApiConstants.ticketsUnassign,
+      data: {'ticketId': ticketId},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   /// Upload evidence
   Future<Map<String, dynamic>> uploadEvidence(FormData formData) async {
     final response = await _dio.post(

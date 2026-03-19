@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dompis_app/core/theme.dart';
 import 'package:dompis_app/providers/api_providers.dart';
 import 'package:dompis_app/widgets/stat_card.dart';
+import 'package:dompis_app/providers/theme_provider.dart';
 
 class HelpdeskDashboard extends ConsumerStatefulWidget {
   const HelpdeskDashboard({super.key});
@@ -52,16 +53,38 @@ class _HelpdeskDashboardState extends ConsumerState<HelpdeskDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Helpdesk Dashboard',
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary)),
-            const SizedBox(height: 2),
-            const Text('Manage and monitor tickets',
-                style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Helpdesk Dashboard',
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: context.themeColors.textPrimary)),
+                    const SizedBox(height: 2),
+                    Text('Manage and monitor tickets',
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: context.themeColors.textSecondary)),
+                  ],
+                ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final themeMode = ref.watch(themeProvider);
+                    return IconButton(
+                      icon: Icon(
+                        themeMode == ThemeMode.dark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                        color: themeMode == ThemeMode.dark ? Colors.amber : context.themeColors.textPrimary,
+                      ),
+                      onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                    );
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
 
             GridView.count(

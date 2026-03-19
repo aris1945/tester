@@ -24,9 +24,9 @@ class StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.themeColors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.themeColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +37,7 @@ class StatCard extends StatelessWidget {
                     width: 32,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: AppColors.borderLight,
+                      color: context.themeColors.border,
                       borderRadius: BorderRadius.circular(6),
                     ),
                   )
@@ -52,9 +52,9 @@ class StatCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: context.themeColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),

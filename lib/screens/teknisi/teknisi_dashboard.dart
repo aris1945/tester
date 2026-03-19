@@ -7,6 +7,7 @@ import 'package:dompis_app/providers/api_providers.dart';
 import 'package:dompis_app/providers/auth_provider.dart';
 import 'package:dompis_app/widgets/ticket_card.dart';
 import 'package:dompis_app/widgets/stat_card.dart';
+import 'package:dompis_app/providers/theme_provider.dart';
 
 // Ticket filter tabs (matching the web app)
 enum TicketFilter { all, assigned, onProgress, pending, closed }
@@ -137,7 +138,7 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceLight,
+      backgroundColor: context.themeColors.surface,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadTickets,
@@ -158,7 +159,7 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: context.themeColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -166,7 +167,7 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                             'Manage your assigned tickets',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.textSecondary,
+                              color: context.themeColors.textSecondary,
                             ),
                           ),
                         ],
@@ -175,12 +176,27 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                         children: [
                           // Attendance button
                           _buildIconButton(
+                            context: context,
                             icon: Icons.access_time_rounded,
                             onTap: () => context.push('/teknisi/attendance'),
                           ),
                           const SizedBox(width: 8),
+                          // Theme Toggle
+                          Consumer(
+                            builder: (context, ref, child) {
+                              final mode = ref.watch(themeProvider);
+                              return _buildIconButton(
+                                context: context,
+                                icon: mode == ThemeMode.dark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                color: mode == ThemeMode.dark ? Colors.amber : context.themeColors.textPrimary,
+                                onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 8),
                           // Logout button
                           _buildIconButton(
+                            context: context,
                             icon: Icons.logout_rounded,
                             onTap: () {
                               ref.read(authProvider.notifier).logout();
@@ -253,22 +269,22 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                     decoration: InputDecoration(
                       hintText: 'Cari nomor tiket... (contoh: INC45671234)',
                       hintStyle: TextStyle(
-                        color: AppColors.textMuted,
+                        color: context.themeColors.textMuted,
                         fontSize: 13,
                       ),
-                      prefixIcon: const Icon(Icons.search, size: 20,
-                          color: AppColors.textMuted),
+                      prefixIcon: Icon(Icons.search, size: 20,
+                          color: context.themeColors.textMuted),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: context.themeColors.card,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide:
-                            const BorderSide(color: AppColors.borderLight),
+                            BorderSide(color: context.themeColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide:
-                            const BorderSide(color: AppColors.borderLight),
+                            BorderSide(color: context.themeColors.border),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
@@ -302,12 +318,12 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                               decoration: BoxDecoration(
                                 color: isActive
                                     ? AppColors.primary
-                                    : Colors.white,
+                                    : context.themeColors.card,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isActive
                                       ? AppColors.primary
-                                      : AppColors.borderLight,
+                                      : context.themeColors.border,
                                 ),
                               ),
                               child: Text(
@@ -317,7 +333,7 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                                   fontWeight: FontWeight.w600,
                                   color: isActive
                                       ? Colors.white
-                                      : AppColors.textSecondary,
+                                      : context.themeColors.textSecondary,
                                 ),
                               ),
                             ),
@@ -356,7 +372,7 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: context.themeColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -366,7 +382,7 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                               : 'Ticket akan muncul ketika ditugaskan',
                           style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.textMuted,
+                            color: context.themeColors.textMuted,
                           ),
                         ),
                       ],
@@ -412,9 +428,9 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
                         ),
                         Text(
                           '$_currentPage / $totalPages',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: context.themeColors.textSecondary,
                           ),
                         ),
                         IconButton(
@@ -438,11 +454,13 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
   }
 
   Widget _buildIconButton({
+    required BuildContext context,
     required IconData icon,
     required VoidCallback onTap,
+    Color? color,
   }) {
     return Material(
-      color: Colors.white,
+      color: context.themeColors.card,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -450,10 +468,10 @@ class _TeknisiDashboardState extends ConsumerState<TeknisiDashboard> {
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.borderLight),
+            border: Border.all(color: context.themeColors.border),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, size: 20, color: AppColors.textSecondary),
+          child: Icon(icon, size: 20, color: color ?? context.themeColors.textSecondary),
         ),
       ),
     );

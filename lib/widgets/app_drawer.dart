@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dompis_app/core/theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dompis_app/providers/theme_provider.dart';
 
 class DrawerMenuItem {
   final String label;
@@ -44,7 +46,7 @@ class AppDrawer extends StatelessWidget {
         .join();
 
     return Drawer(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: context.themeColors.card,
       child: SafeArea(
         child: Column(
           children: [
@@ -58,7 +60,7 @@ class AppDrawer extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: Colors.white.withOpacity(0.1),
+                      color: context.themeColors.textPrimary.withOpacity(0.1),
                     ),
                     child: const Icon(
                       Icons.confirmation_number_rounded,
@@ -72,8 +74,8 @@ class AppDrawer extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: context.themeColors.textPrimary,
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                         ),
@@ -81,13 +83,26 @@ class AppDrawer extends StatelessWidget {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: context.themeColors.textMuted,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 2,
                         ),
                       ),
                     ],
+                  ),
+                  const Spacer(),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final themeMode = ref.watch(themeProvider);
+                      return IconButton(
+                        icon: Icon(
+                          themeMode == ThemeMode.dark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                          color: themeMode == ThemeMode.dark ? Colors.amber : context.themeColors.textPrimary,
+                        ),
+                        onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -103,7 +118,7 @@ class AppDrawer extends StatelessWidget {
                 child: Text(
                   'MAIN',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.35),
+                    color: context.themeColors.textMuted,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.5,
@@ -123,7 +138,7 @@ class AppDrawer extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Material(
                       color: isActive
-                          ? Colors.white.withOpacity(0.1)
+                          ? AppColors.primary.withOpacity(0.1)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
@@ -143,16 +158,16 @@ class AppDrawer extends StatelessWidget {
                                 item.icon,
                                 size: 20,
                                 color: isActive
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.5),
+                                    ? AppColors.primary
+                                    : context.themeColors.textSecondary,
                               ),
                               const SizedBox(width: 14),
                               Text(
                                 item.label,
                                 style: TextStyle(
                                   color: isActive
-                                      ? Colors.white
-                                      : Colors.white.withOpacity(0.7),
+                                      ? AppColors.primary
+                                      : context.themeColors.textSecondary,
                                   fontSize: 14,
                                   fontWeight: isActive
                                       ? FontWeight.w600
@@ -174,8 +189,9 @@ class AppDrawer extends StatelessWidget {
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
+                color: context.themeColors.surface,
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: context.themeColors.border),
               ),
               child: Row(
                 children: [
@@ -206,8 +222,8 @@ class AppDrawer extends StatelessWidget {
                       children: [
                         Text(
                           userName ?? 'User',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: context.themeColors.textPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -216,7 +232,7 @@ class AppDrawer extends StatelessWidget {
                         Text(
                           userRole ?? '',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: context.themeColors.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -231,7 +247,7 @@ class AppDrawer extends StatelessWidget {
                       child: Icon(
                         Icons.logout_rounded,
                         size: 20,
-                        color: Colors.white.withOpacity(0.5),
+                        color: context.themeColors.textMuted,
                       ),
                     ),
                   ),

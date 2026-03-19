@@ -4,8 +4,19 @@ import 'package:dompis_app/core/theme.dart';
 import 'package:dompis_app/router.dart';
 import 'package:dompis_app/providers/auth_provider.dart';
 
-void main() {
-  runApp(const ProviderScope(child: DompisApp()));
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dompis_app/providers/theme_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+
+  runApp(ProviderScope(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+    ],
+    child: const DompisApp(),
+  ));
 }
 
 class DompisApp extends ConsumerStatefulWidget {
@@ -28,11 +39,14 @@ class _DompisAppState extends ConsumerState<DompisApp> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
+    final currentThemeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
       title: 'DOMPIS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: currentThemeMode,
       routerConfig: router,
     );
   }

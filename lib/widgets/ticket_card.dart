@@ -6,11 +6,13 @@ import 'package:dompis_app/data/models/ticket.dart';
 class TicketCard extends StatelessWidget {
   final Ticket ticket;
   final VoidCallback? onTap;
+  final VoidCallback? onAssignTap;
 
   const TicketCard({
     super.key,
     required this.ticket,
     this.onTap,
+    this.onAssignTap,
   });
 
   @override
@@ -25,9 +27,9 @@ class TicketCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.themeColors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.themeColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,11 +47,11 @@ class TicketCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           ticket.ticket,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             fontFamily: 'monospace',
-                            color: AppColors.textPrimary,
+                            color: context.themeColors.textPrimary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -86,10 +88,10 @@ class TicketCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     ticket.contactName ?? '-',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+                      color: context.themeColors.textPrimary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -106,9 +108,9 @@ class TicketCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   ticket.serviceNo ?? '-',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.themeColors.textSecondary,
                   ),
                 ),
               ],
@@ -141,34 +143,84 @@ class TicketCard extends StatelessWidget {
                   ),
                 Text(
                   AppUtils.formatDateShort(ticket.reportedDate),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.textMuted,
+                    color: context.themeColors.textMuted,
                   ),
                 ),
               ],
             ),
 
-            // Technician name (if assigned)
-            if (ticket.technicianName != null &&
-                ticket.technicianName!.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(Icons.engineering_outlined, size: 13,
-                      color: AppColors.closed),
-                  const SizedBox(width: 4),
-                  Text(
-                    ticket.technicianName!,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.closed,
-                    ),
+            const SizedBox(height: 12),
+            Divider(height: 1, color: context.themeColors.border),
+            const SizedBox(height: 12),
+
+            // Technician and Assign Button section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Technician',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      if (ticket.technicianName != null &&
+                          ticket.technicianName!.isNotEmpty)
+                        Text(
+                          ticket.technicianName!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: context.themeColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      else
+                        const Text(
+                          'Unassigned',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Jenis tiket: ${ticket.jenisTiket?.toUpperCase() ?? 'UNSPEC'}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+                if (onAssignTap != null)
+                  ElevatedButton(
+                    onPressed: onAssignTap,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB), // Blue 600
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      minimumSize: Size.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Icon(Icons.person_add_alt_1, size: 20),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
