@@ -96,8 +96,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     final name = _user?['nama'] ?? _user?['username'] ?? 'User';
     final username = _user?['username'] ?? '-';
-    final role = _user?['role'] ?? '-';
-    final workzone = _user?['workzone'] ?? '-';
+    final role = _user?['role_name'] ?? '-';
+    final position = _user?['jabatan'] ?? '-';
     final initials = name
         .toString()
         .split(' ')
@@ -170,9 +170,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: 32),
 
           // Info Cards
-          _buildInfoCard(Icons.person_outline, 'Username', username.toString()),
+          _buildInfoCard(Icons.person_outline, 'Nama', name.toString()),
+          _buildInfoCard(
+            Icons.location_on_outlined,
+            'Jabatan',
+            position.toString(),
+          ),
           _buildInfoCard(Icons.badge_outlined, 'Role', role.toString()),
-          _buildInfoCard(Icons.location_on_outlined, 'Workzone', workzone.toString()),
 
           const SizedBox(height: 32),
 

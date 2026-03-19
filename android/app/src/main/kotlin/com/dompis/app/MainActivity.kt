@@ -1,4 +1,4 @@
-package com.dompis.dompis_app
+package com.dompis.app
 
 import io.flutter.embedding.android.FlutterActivity
 

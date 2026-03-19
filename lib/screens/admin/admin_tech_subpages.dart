@@ -117,111 +117,165 @@ class _AdminTechAttendanceScreenState
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _fetchData,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Title
-          const Text('Rekap Absensi Teknisi',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary)),
-          const SizedBox(height: 4),
-          const Text('Lihat rekap absensi teknisi per bulan',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          const SizedBox(height: 20),
-
-          // Month picker
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                onPressed: () => _changeMonth(-1),
-              ),
-              Container(
-                constraints: const BoxConstraints(minWidth: 180),
-                alignment: Alignment.center,
-                child: Text(
-                  '${_months[_month - 1]} $_year',
-                  style: const TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.w600),
+    return Scaffold(
+      backgroundColor: context.themeColors.surface,
+      body: RefreshIndicator(
+        onRefresh: _fetchData,
+        color: AppColors.primary,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            // Title
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Rekap Absensi Teknisi',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: context.themeColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Lihat rekap absensi teknisi per bulan',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: context.themeColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: () => _changeMonth(1),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
+              ],
+            ),
+            const SizedBox(height: 24),
 
-          // Overview stats row
-          Row(
-            children: [
-              Expanded(
-                  child: _overviewCard(
-                      Icons.calendar_today, 'Hari Kerja', '$_totalWorkingDays',
-                      Colors.blue)),
-              const SizedBox(width: 8),
-              Expanded(
-                  child: _overviewCard(
-                      Icons.check_circle_outline, 'Rata-rata',
-                      '${_avgPercentage.round()}%', Colors.green)),
-              const SizedBox(width: 8),
-              Expanded(
-                  child: _overviewCard(
-                      Icons.people_outline, 'Teknisi', '${_summaries.length}',
-                      Colors.orange)),
-            ],
-          ),
-          const SizedBox(height: 20),
+            // Month picker
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  color: context.themeColors.textPrimary,
+                  onPressed: () => _changeMonth(-1),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${_months[_month - 1]} $_year',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: context.themeColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  color: context.themeColors.textPrimary,
+                  onPressed: () => _changeMonth(1),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
 
-          // Table
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.all(40),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_summaries.isEmpty)
-            _emptyState('Tidak ada data absensi')
-          else
-            _buildTable(),
-        ],
+            // Overview stats row
+            Row(
+              children: [
+                Expanded(
+                  child: _overviewCard(
+                    Icons.calendar_today_outlined,
+                    'Hari Kerja',
+                    '$_totalWorkingDays',
+                    const Color(0xFF3B82F6),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _overviewCard(
+                    Icons.check_circle_outline_rounded,
+                    'Rata-rata',
+                    '${_avgPercentage.round()}%',
+                    const Color(0xFF10B981),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _overviewCard(
+                    Icons.people_alt_outlined,
+                    'Teknisi',
+                    '${_summaries.length}',
+                    const Color(0xFFF59E0B),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Table Section
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.all(60),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_summaries.isEmpty)
+              _emptyState('Tidak ada data absensi')
+            else
+              _buildTable(),
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
 
   Widget _overviewCard(IconData icon, String label, String value, Color color) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight),
+        color: context.themeColors.card,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 18, color: color),
+            child: Icon(icon, size: 20, color: color),
           ),
-          const SizedBox(height: 8),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: color)),
-          const SizedBox(height: 2),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 11, color: AppColors.textSecondary)),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary.withOpacity(0.7),
+            ),
+          ),
         ],
       ),
     );
@@ -230,83 +284,158 @@ class _AdminTechAttendanceScreenState
   Widget _buildTable() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight),
+        color: context.themeColors.card,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          headingRowColor: WidgetStateProperty.all(
-              AppColors.surfaceLight),
-          columnSpacing: 16,
-          columns: const [
-            DataColumn(label: Text('Teknisi',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11))),
-            DataColumn(label: Text('Workzone',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11))),
-            DataColumn(label: Text('Hadir',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                numeric: true),
-            DataColumn(label: Text('Terlambat',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                numeric: true),
-            DataColumn(label: Text('Persentase',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                numeric: true),
+          headingRowColor: WidgetStateProperty.all(context.themeColors.surface),
+          columnSpacing: 24,
+          horizontalMargin: 20,
+          columns: [
+            DataColumn(
+              label: Text('Teknisi',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+            ),
+            DataColumn(
+              label: Text('Workzone',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+            ),
+            DataColumn(
+              label: Text('Hadir',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text('Terlambat',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text('Persentase',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+              numeric: true,
+            ),
           ],
-          rows: _summaries.map((s) => DataRow(cells: [
-            DataCell(Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(s.name, style: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 13)),
-                if (s.nik.isNotEmpty)
-                  Text(s.nik, style: const TextStyle(
-                      fontSize: 11, color: AppColors.textMuted)),
-              ],
-            )),
-            DataCell(Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(s.workzone,
-                  style: const TextStyle(fontSize: 11)),
-            )),
-            DataCell(Text('${s.present}',
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: Colors.green))),
-            DataCell(Text('${s.late}',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.amber.shade700))),
-            DataCell(Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 50,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: s.percentage / 100,
-                      backgroundColor: AppColors.borderLight,
-                      color: _percentageColor(s.percentage),
-                      minHeight: 6,
+          rows: _summaries.map((s) {
+            return DataRow(
+              cells: [
+                DataCell(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(s.name,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: context.themeColors.textPrimary)),
+                      if (s.nik.isNotEmpty)
+                        Text(s.nik,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: context.themeColors.textSecondary.withOpacity(0.7))),
+                    ],
+                  ),
+                ),
+                DataCell(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.themeColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      s.workzone,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: context.themeColors.textSecondary,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 6),
-                Text('${s.percentage}%',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: _percentageColor(s.percentage))),
+                DataCell(
+                  Text('${s.present}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          color: Color(0xFF10B981))),
+                ),
+                DataCell(
+                  Text('${s.late}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          color: Color(0xFFF59E0B))),
+                ),
+                DataCell(
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Stack(
+                          children: [
+                            Container(
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: context.themeColors.surface,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: (s.percentage / 100).clamp(0.0, 1.0),
+                              child: Container(
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: _percentageColor(s.percentage),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '${s.percentage.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: _percentageColor(s.percentage),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
-            )),
-          ])).toList(),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -326,7 +455,7 @@ class _AdminTechAttendanceScreenState
           const Icon(Icons.people_outline, size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(msg,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 16, color: AppColors.textSecondary)),
         ],
       ),
@@ -430,73 +559,91 @@ class _AdminTechPerformanceScreenState
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _fetchData,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Title
-          const Text('Performa Teknisi (Bulanan)',
+    return Scaffold(
+      backgroundColor: context.themeColors.surface,
+      body: RefreshIndicator(
+        onRefresh: _fetchData,
+        color: AppColors.primary,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            // Title
+            Text(
+              'Performa Teknisi (Bulanan)',
               style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary)),
-          const SizedBox(height: 4),
-          const Text('Rekap pekerjaan teknisi per bulan',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          const SizedBox(height: 20),
-
-          // Month picker
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                onPressed: () => _changeMonth(-1),
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: context.themeColors.textPrimary,
+                letterSpacing: -0.5,
               ),
-              Container(
-                constraints: const BoxConstraints(minWidth: 180),
-                alignment: Alignment.center,
-                child: Text(
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Rekap pekerjaan teknisi per bulan',
+              style: TextStyle(
+                fontSize: 14,
+                color: context.themeColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Month picker
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  color: context.themeColors.textPrimary,
+                  onPressed: () => _changeMonth(-1),
+                ),
+                const SizedBox(width: 8),
+                Text(
                   '${_months[_month - 1]} $_year',
-                  style: const TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: context.themeColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  color: context.themeColors.textPrimary,
+                  onPressed: () => _changeMonth(1),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Error
+            if (_error != null)
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                ),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(fontSize: 14, color: Colors.redAccent),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: () => _changeMonth(1),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
 
-          // Error
-          if (_error != null)
-            Container(
-              padding: const EdgeInsets.all(14),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.shade200),
-              ),
-              child: Text(_error!,
-                  style: TextStyle(
-                      fontSize: 13, color: Colors.red.shade600)),
-            ),
-
-          // Table
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.all(40),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_rows.isEmpty && _error == null)
-            _emptyState('Tidak ada data')
-          else
-            _buildTable(),
-        ],
+            // Table
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.all(60),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_rows.isEmpty && _error == null)
+              _emptyState('Tidak ada data')
+            else
+              _buildTable(),
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
@@ -504,46 +651,76 @@ class _AdminTechPerformanceScreenState
   Widget _buildTable() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight),
+        color: context.themeColors.card,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          headingRowColor: WidgetStateProperty.all(
-              AppColors.surfaceLight),
-          columnSpacing: 20,
-          columns: const [
-            DataColumn(label: Text('Nama',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11))),
-            DataColumn(label: Text('NIK',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11))),
-            DataColumn(label: Text('Workzone',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11))),
-            DataColumn(label: Text('Closed',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                numeric: true),
-            DataColumn(label: Text('Avg Resolve (h)',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                numeric: true),
+          headingRowColor: WidgetStateProperty.all(context.themeColors.surface),
+          columnSpacing: 28,
+          horizontalMargin: 20,
+          columns: [
+            DataColumn(
+              label: Text('Nama',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+            ),
+            DataColumn(
+              label: Text('NIK',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+            ),
+            DataColumn(
+              label: Text('Workzone',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+            ),
+            DataColumn(
+              label: Text('Closed',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: context.themeColors.textSecondary)),
+              numeric: true,
+            ),
           ],
-          rows: _rows.map((r) => DataRow(cells: [
-            DataCell(Text(r.name,
-                style: const TextStyle(fontWeight: FontWeight.w600))),
-            DataCell(Text(r.nik.isEmpty ? '-' : r.nik,
-                style: const TextStyle(fontSize: 12))),
-            DataCell(Text(r.workzone,
-                style: const TextStyle(fontSize: 12))),
-            DataCell(Text('${r.closedCount}',
-                style: const TextStyle(fontWeight: FontWeight.w600))),
-            DataCell(Text(
-              r.avgResolveHours != null
-                  ? r.avgResolveHours!.toStringAsFixed(1)
-                  : '-',
-              style: const TextStyle(fontSize: 12),
-            )),
-          ])).toList(),
+          rows: _rows.map((r) {
+            return DataRow(
+              cells: [
+                DataCell(Text(r.name,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: context.themeColors.textPrimary))),
+                DataCell(Text(r.nik.isEmpty ? '-' : r.nik,
+                    style: TextStyle(
+                        fontSize: 13, color: context.themeColors.textSecondary))),
+                DataCell(Text(r.workzone,
+                    style: TextStyle(
+                        fontSize: 13, color: context.themeColors.textSecondary))),
+                DataCell(Text('${r.closedCount}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: context.themeColors.textPrimary))),
+              ],
+            );
+          }).toList(),
         ),
       ),
     );
@@ -558,7 +735,7 @@ class _AdminTechPerformanceScreenState
               size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(msg,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 16, color: AppColors.textSecondary)),
         ],
       ),
@@ -687,151 +864,197 @@ class _AdminTechManhoursScreenState
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _fetchData,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Title
-          const Text('Produktivitas ManHours Teknisi',
+    return Scaffold(
+      backgroundColor: context.themeColors.surface,
+      body: RefreshIndicator(
+        onRefresh: _fetchData,
+        color: AppColors.primary,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            // Title
+            Text(
+              'Produktivitas ManHours Teknisi',
               style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary)),
-          const SizedBox(height: 4),
-          const Text(
-            'Monitoring produktivitas berdasarkan realisasi manhours per kategori tiket',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 20),
-
-          // Filter section
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.borderLight),
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: context.themeColors.textPrimary,
+                letterSpacing: -0.5,
+              ),
             ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: _dateField('Dari', _dateFrom, (v) {
-                      setState(() => _dateFrom = v);
-                    })),
-                    const SizedBox(width: 8),
-                    Expanded(child: _dateField('Sampai', _dateTo, (v) {
-                      setState(() => _dateTo = v);
-                    })),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStoDropdown(),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Nama Teknisi',
-                          labelStyle: const TextStyle(fontSize: 12),
-                          hintText: 'Cari nama...',
-                          hintStyle: const TextStyle(fontSize: 12),
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          suffixIcon: const Icon(Icons.search, size: 18),
-                        ),
-                        style: const TextStyle(fontSize: 13),
-                        onChanged: (v) => _nameSearch = v,
-                        onSubmitted: (_) => _fetchData(),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _loading ? null : _fetchData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D9488),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: Text(_loading ? 'Loading...' : 'Tampilkan',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, color: Colors.white)),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 4),
+            Text(
+              'Monitoring produktivitas berdasarkan realisasi manhours per kategori tiket',
+              style: TextStyle(
+                fontSize: 14,
+                color: context.themeColors.textSecondary,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-          // Summary stats
-          if (_rows.isNotEmpty) ...[
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 2.5,
-              children: [
-                _summaryCard(Icons.people, 'Total Teknisi',
-                    '$_totalTeknisi', Colors.blue),
-                _summaryCard(Icons.emoji_events, 'Total Tiket Closed',
-                    '$_totalTiket', Colors.purple),
-                _summaryCard(Icons.trending_up, 'Total Realisasi MH',
-                    '$_totalRealisasi', Colors.green),
-                _summaryCard(Icons.timer, 'Avg Produktivitas',
-                    _avgProduktivitas.toStringAsFixed(2), Colors.orange),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-
-          // Error
-          if (_error != null)
+            // Filter section (White Card)
             Container(
-              padding: const EdgeInsets.all(14),
-              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.shade200),
+                color: context.themeColors.card,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_error!,
-                      style: TextStyle(fontSize: 13, color: Colors.red.shade600)),
-                  const SizedBox(height: 8),
-                  OutlinedButton(
-                    onPressed: _fetchData,
-                    child: const Text('Coba Lagi'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _dateField('Dari', _dateFrom, (v) {
+                          setState(() => _dateFrom = v);
+                        }),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _dateField('Sampai', _dateTo, (v) {
+                          setState(() => _dateTo = v);
+                        }),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _buildStoDropdown()),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'NAME',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: context.themeColors.textSecondary,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: context.themeColors.surface,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Nama Teknisi',
+                                  hintStyle: TextStyle(
+                                      fontSize: 14, color: context.themeColors.textMuted),
+                                  isDense: true,
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  suffixIcon: Icon(Icons.search,
+                                      size: 18, color: context.themeColors.textMuted),
+                                  suffixIconConstraints: const BoxConstraints(),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                style: TextStyle(
+                                    fontSize: 14, color: context.themeColors.textPrimary),
+                                onChanged: (v) => _nameSearch = v,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _fetchData,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D9488),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text(
+                        _loading ? 'Memproses...' : 'Tampilkan',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            letterSpacing: 0.5),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 28),
 
-          // Table
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.all(40),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_rows.isEmpty && _error == null)
-            _emptyState()
-          else
-            _buildTable(),
-        ],
+            // Summary stats cards (Grid)
+            if (_rows.isNotEmpty) ...[
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.6,
+                children: [
+                  _summaryCard(Icons.people_alt_rounded, 'Total Teknisi',
+                      '$_totalTeknisi', const Color(0xFF3B82F6)),
+                  _summaryCard(Icons.emoji_events_rounded, 'Total Tiket Closed',
+                      '$_totalTiket', const Color(0xFF8B5CF6)),
+                  _summaryCard(Icons.trending_up_rounded, 'Total Realisasi MH',
+                      '$_totalRealisasi', const Color(0xFF10B981)),
+                  _summaryCard(Icons.timer_rounded, 'Avg Produktivitas',
+                      _avgProduktivitas.toStringAsFixed(2), const Color(0xFFF59E0B)),
+                ],
+              ),
+              const SizedBox(height: 28),
+            ],
+
+            // Error
+            if (_error != null)
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                ),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(fontSize: 14, color: Colors.redAccent),
+                ),
+              ),
+
+            // Table
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.all(60),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_rows.isEmpty && _error == null)
+              _emptyState()
+            else
+              _buildTable(),
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
@@ -840,13 +1063,16 @@ class _AdminTechManhoursScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-                letterSpacing: 1)),
-        const SizedBox(height: 4),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: context.themeColors.textSecondary,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 8),
         InkWell(
           onTap: () async {
             final picked = await showDatePicker(
@@ -860,19 +1086,22 @@ class _AdminTechManhoursScreenState
             }
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.borderLight),
+              color: context.themeColors.surface,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
                 Expanded(
-                  child: Text(value,
-                      style: const TextStyle(fontSize: 13)),
+                  child: Text(
+                    value,
+                    style:
+                        TextStyle(fontSize: 14, color: context.themeColors.textPrimary),
+                  ),
                 ),
-                const Icon(Icons.calendar_today, size: 14,
-                    color: AppColors.textMuted),
+                Icon(Icons.calendar_month_rounded,
+                    size: 18, color: context.themeColors.textMuted),
               ],
             ),
           ),
@@ -885,49 +1114,62 @@ class _AdminTechManhoursScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('STO',
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-                letterSpacing: 1)),
-        const SizedBox(height: 4),
+        Text(
+          'STO',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: context.themeColors.textSecondary,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.borderLight),
+            color: context.themeColors.surface,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: DropdownButton<String>(
-            value: _sto.isEmpty ? null : _sto,
-            hint: const Text('Semua STO',
-                style: TextStyle(fontSize: 13)),
-            isExpanded: true,
-            isDense: true,
-            underline: const SizedBox(),
-            style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
-            items: [
-              const DropdownMenuItem(value: '', child: Text('Semua STO')),
-              ..._stoOptions.map((s) =>
-                  DropdownMenuItem(value: s, child: Text(s))),
-            ],
-            onChanged: (v) => setState(() => _sto = v ?? ''),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              dropdownColor: context.themeColors.card,
+              value: _sto.isEmpty ? null : _sto,
+              hint: Text('Semua STO',
+                  style: TextStyle(fontSize: 14, color: context.themeColors.textMuted)),
+              isExpanded: true,
+              icon: Icon(Icons.keyboard_arrow_down_rounded,
+                  color: context.themeColors.textMuted),
+              style: TextStyle(fontSize: 14, color: context.themeColors.textPrimary),
+              items: [
+                const DropdownMenuItem(value: '', child: Text('Semua STO')),
+                ..._stoOptions
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s))),
+              ],
+              onChanged: (v) => setState(() => _sto = v ?? ''),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _summaryCard(
-      IconData icon, String label, String value, Color color) {
+  Widget _summaryCard(IconData icon, String label, String value, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
+        color: context.themeColors.card,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -935,21 +1177,25 @@ class _AdminTechManhoursScreenState
               color: color,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: Colors.white),
+            child: Icon(icon, size: 18, color: Colors.white),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 10, color: AppColors.textSecondary)),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.w700)),
-              ],
+          const Spacer(),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: context.themeColors.textSecondary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: color,
             ),
           ),
         ],
@@ -960,68 +1206,91 @@ class _AdminTechManhoursScreenState
   Widget _buildTable() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight),
+        color: context.themeColors.card,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          headingRowColor: WidgetStateProperty.all(
-              const Color(0xFF14B8A6)),
+          headingRowColor: WidgetStateProperty.all(const Color(0xFF14B8A6)),
+          columnSpacing: 24,
+          horizontalMargin: 20,
           headingTextStyle: const TextStyle(
               color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
               letterSpacing: 0.5),
-          columnSpacing: 14,
-          dataRowMinHeight: 40,
-          dataRowMaxHeight: 56,
           columns: [
-            const DataColumn(label: Text('No')),
-            const DataColumn(label: Text('Nama')),
+            const DataColumn(label: Text('NO')),
+            const DataColumn(label: Text('NAMA')),
             const DataColumn(label: Text('STO')),
-            ..._configs.map((c) => DataColumn(
-                label: Text(c.label), numeric: true)),
-            const DataColumn(label: Text('Total'), numeric: true),
-            const DataColumn(label: Text('Produktivitas'), numeric: true),
-            const DataColumn(label: Text('Target'), numeric: true),
-            const DataColumn(label: Text('Realisasi'), numeric: true),
-            const DataColumn(label: Text('Jam Efektif'), numeric: true),
+            ..._configs.map((c) => DataColumn(label: Text(c.label.toUpperCase()))),
+            const DataColumn(label: Text('TOTAL'), numeric: true),
+            const DataColumn(label: Text('PRODUKTIVITAS'), numeric: true),
+            const DataColumn(label: Text('TARGET'), numeric: true),
+            const DataColumn(label: Text('REALISASI'), numeric: true),
+            const DataColumn(label: Text('JAM EFEKTIF'), numeric: true),
           ],
           rows: _rows.asMap().entries.map((entry) {
             final idx = entry.key;
             final r = entry.value;
-            return DataRow(cells: [
-              DataCell(Text('${idx + 1}')),
-              DataCell(Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(r.name, style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 12)),
-                  if (r.nik.isNotEmpty)
-                    Text(r.nik, style: const TextStyle(
-                        fontSize: 10, color: AppColors.textMuted)),
-                ],
-              )),
-              DataCell(Text(r.sto, style: const TextStyle(fontSize: 12))),
-              ..._configs.map((c) => DataCell(
-                Text('${r.categories[c.jenisKey] ?? 0}',
-                    style: const TextStyle(fontSize: 12)),
-              )),
-              DataCell(Text('${r.totalTickets}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 12))),
-              DataCell(_produktivitasBadge(r.produktivitas)),
-              DataCell(Text('${r.target}',
-                  style: const TextStyle(fontSize: 12))),
-              DataCell(Text('${r.realisasi}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 12))),
-              DataCell(Text('${r.jamEfektif}',
-                  style: const TextStyle(fontSize: 12))),
-            ]);
+            return DataRow(
+              cells: [
+                DataCell(Text('${idx + 1}',
+                    style: TextStyle(
+                        fontSize: 13, color: context.themeColors.textSecondary))),
+                DataCell(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(r.name,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: context.themeColors.textPrimary)),
+                      if (r.nik.isNotEmpty)
+                        Text(r.nik,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: context.themeColors.textSecondary.withOpacity(0.7))),
+                    ],
+                  ),
+                ),
+                DataCell(Text(r.sto,
+                    style: TextStyle(
+                        fontSize: 13, color: context.themeColors.textPrimary))),
+                ..._configs.map((c) => DataCell(Text(
+                    '${r.categories[c.jenisKey] ?? 0}',
+                    style: TextStyle(
+                        fontSize: 13, color: context.themeColors.textPrimary)))),
+                DataCell(Text('${r.totalTickets}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: context.themeColors.textPrimary))),
+                DataCell(_produktivitasBadge(r.produktivitas)),
+                DataCell(Text('${r.target}',
+                    style: TextStyle(
+                        fontSize: 13, color: context.themeColors.textPrimary))),
+                DataCell(Text('${r.realisasi}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: Color(0xFF0D9488)))),
+                DataCell(Text('${r.jamEfektif}',
+                    style: TextStyle(
+                        fontSize: 13, color: context.themeColors.textPrimary))),
+              ],
+            );
           }).toList(),
         ),
       ),

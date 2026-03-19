@@ -15,9 +15,18 @@ class AdminTechniciansScreen extends ConsumerStatefulWidget {
 
 class _AdminTechniciansScreenState
     extends ConsumerState<AdminTechniciansScreen> {
+  final TextEditingController _searchController = TextEditingController();
   List<dynamic> _technicians = [];
   bool _loading = true;
-  String? _error;
+  String _searchQuery = '';
+  String? _selectedWorkzone;
+  String? _selectedStatus;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -28,7 +37,6 @@ class _AdminTechniciansScreenState
   Future<void> _fetchTechnicians() async {
     setState(() {
       _loading = true;
-      _error = null;
     });
 
     try {
@@ -43,13 +51,11 @@ class _AdminTechniciansScreenState
         });
       } else {
         setState(() {
-          _error = data['message'] as String? ?? 'Gagal memuat data';
           _loading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _error = 'Gagal memuat data teknisi';
         _loading = false;
       });
     }
@@ -57,106 +63,436 @@ class _AdminTechniciansScreenState
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _fetchTechnicians,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Title + sub-links
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Monitoring Teknisi',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+    // Local filtering
+    final filteredTechs = _technicians.where((tech) {
+      final matchesSearch =
+          tech['nama']?.toString().toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ??
+          true;
+      final matchesWorkzone =
+          _selectedWorkzone == null || tech['workzone'] == _selectedWorkzone;
+      // 'status' mapping depends on your data, using a simple check here
+      final techStatus = (tech['total_assigned'] as int? ?? 0) == 0
+          ? 'Idle'
+          : 'Active';
+      final matchesStatus =
+          _selectedStatus == null || techStatus == _selectedStatus;
+
+      return matchesSearch && matchesWorkzone && matchesStatus;
+    }).toList();
+
+    final total = _technicians.length;
+    final assigned = _technicians
+        .where((t) => (t['total_assigned'] as int? ?? 0) > 0)
+        .length;
+    final onProgress = _technicians
+        .where(
+          (t) =>
+              (t['total_assigned'] as int? ?? 0) > 0 &&
+              (t['total_assigned'] as int? ?? 0) < 4,
+        )
+        .length;
+    final pending = _technicians
+        .where((t) => (t['total_assigned'] as int? ?? 0) >= 4)
+        .length;
+
+    return Scaffold(
+      backgroundColor: context.themeColors.surface,
+      body: RefreshIndicator(
+        onRefresh: _fetchTechnicians,
+        color: AppColors.primary,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      'Monitoring Teknisi',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: context.themeColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // Area info
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_rounded,
+                          size: 14,
+                          color: context.themeColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Area: KRP, LKI',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: context.themeColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    // Navigation Links
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildHeaderLink(
+                            Icons.calendar_month_outlined,
+                            'Rekap\nAbsensi',
+                            '/admin/technicians/attendance',
+                          ),
+                          _buildLinkDivider(),
+                          _buildHeaderLink(
+                            Icons.check_circle_outline_rounded,
+                            'Rekap\nPekerjaan\nBulanan',
+                            '/admin/technicians/performance',
+                          ),
+                          _buildLinkDivider(),
+                          _buildHeaderLink(
+                            Icons.trending_up,
+                            'Produktivitas\nManHours',
+                            '/admin/technicians/manhours',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Last update info
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 16,
+                          color: context.themeColors.textMuted,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Diperbarui kurang dari 1 menit yang lalu',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.themeColors.textMuted,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: _fetchTechnicians,
+                          icon: const Icon(Icons.refresh_rounded),
+                          iconSize: 20,
+                          color: context.themeColors.textMuted,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    // SUMMARY Expansion Section
+                    Container(
+                      decoration: BoxDecoration(
+                        color: context.themeColors.card.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: context.themeColors.border.withOpacity(0.5),
+                        ),
+                      ),
+                      child: Theme(
+                        data: Theme.of(
+                          context,
+                        ).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          initiallyExpanded: true,
+                          title: Text(
+                            'SUMMARY',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: context.themeColors.textSecondary,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          trailing: Icon(
+                            Icons.keyboard_arrow_up_rounded,
+                            color: context.themeColors.textMuted,
+                          ),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            16,
+                            0,
+                            16,
+                            16,
+                          ),
+                          children: [
+                            _buildSummaryCard(
+                              'TOTAL TEKNISI',
+                              total,
+                              AppColors.primary,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSummaryCard(
+                              'ASSIGNED',
+                              assigned,
+                              AppColors.primary,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSummaryCard(
+                              'ON PROGRESS',
+                              onProgress,
+                              Colors.orange,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSummaryCard(
+                              'PENDING',
+                              pending,
+                              Colors.orange,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // TECHNICIANS Expansion Section
+                    Container(
+                      decoration: BoxDecoration(
+                        color: context.themeColors.card.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: context.themeColors.border.withOpacity(0.5),
+                        ),
+                      ),
+                      child: Theme(
+                        data: Theme.of(
+                          context,
+                        ).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          initiallyExpanded: true,
+                          title: Text(
+                            'TECHNICIANS',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: context.themeColors.textSecondary,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          trailing: Icon(
+                            Icons.keyboard_arrow_up_rounded,
+                            color: context.themeColors.textMuted,
+                          ),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            16,
+                            0,
+                            16,
+                            16,
+                          ),
+                          children: [
+                            // Search Bar
+                            Container(
+                              decoration: BoxDecoration(
+                                color: context.themeColors.surface.withOpacity(
+                                  0.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: context.themeColors.border.withOpacity(
+                                    0.3,
+                                  ),
+                                ),
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                style: TextStyle(
+                                  color: context.themeColors.textPrimary,
+                                  fontSize: 14,
+                                ),
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  hintText: 'Cari teknisi...',
+                                  hintStyle: TextStyle(
+                                    color: context.themeColors.textMuted,
+                                    fontSize: 14,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    size: 18,
+                                    color: context.themeColors.textMuted,
+                                  ),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onChanged: (val) {
+                                  setState(() => _searchQuery = val);
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Filter Toggles
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildFilterButton(
+                                    label: _selectedWorkzone ?? 'All Workzone',
+                                    isActive: _selectedWorkzone != null,
+                                    onTap: () {
+                                      // TODO: Show workzone selector
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _buildFilterButton(
+                                    label: _selectedStatus ?? 'All Status',
+                                    isActive: _selectedStatus != null,
+                                    onTap: () {
+                                      // TODO: Show status selector
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            // List or Empty
+                            if (filteredTechs.isEmpty)
+                              _buildEmptyState()
+                            else
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: filteredTechs.length,
+                                itemBuilder: (context, index) =>
+                                    _buildTechCard(filteredTechs[index]),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded),
-                onPressed: _fetchTechnicians,
-                color: AppColors.textSecondary,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Sub links
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildSubLink(
-                icon: Icons.calendar_today_rounded,
-                label: 'Rekap Absensi',
-                route: '/admin/technicians/attendance',
-              ),
-              _buildSubLink(
-                icon: Icons.check_circle_outline_rounded,
-                label: 'Rekap Bulanan',
-                route: '/admin/technicians/performance',
-              ),
-              _buildSubLink(
-                icon: Icons.trending_up_rounded,
-                label: 'ManHours',
-                route: '/admin/technicians/manhours',
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Content
-          if (_loading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(40),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else if (_error != null)
-            _buildErrorState()
-          else if (_technicians.isEmpty)
-            _buildEmptyState()
-          else
-            ..._technicians.map((tech) => _buildTechCard(tech)),
-        ],
+            ),
+            if (_loading)
+              const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              const SliverToBoxAdapter(child: SizedBox(height: 4)),
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSubLink({
-    required IconData icon,
+  Widget _buildFilterButton({
     required String label,
-    required String route,
+    required bool isActive,
+    required VoidCallback onTap,
   }) {
     return InkWell(
-      onTap: () => context.go(route),
-      borderRadius: BorderRadius.circular(10),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.06),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+          color: context.themeColors.surface.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: context.themeColors.border.withOpacity(0.3),
+          ),
         ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: context.themeColors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderLink(IconData icon, String label, String route) {
+    return InkWell(
+      onTap: () => context.go(route),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 14, color: AppColors.primary),
-            const SizedBox(width: 6),
+            Icon(icon, size: 16, color: AppColors.primary),
+            const SizedBox(width: 8),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
+                height: 1.2,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLinkDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Container(
+        height: 24,
+        width: 1,
+        color: context.themeColors.border.withOpacity(0.5),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(String label, int value, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: context.themeColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: context.themeColors.textSecondary,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$value',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -188,9 +524,9 @@ class _AdminTechniciansScreenState
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.themeColors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.themeColors.border),
       ),
       child: Row(
         children: [
@@ -221,30 +557,37 @@ class _AdminTechniciansScreenState
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.themeColors.textPrimary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Icon(Icons.location_on, size: 12, color: AppColors.textMuted),
+                    Icon(
+                      Icons.location_on,
+                      size: 12,
+                      color: context.themeColors.textMuted,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       workzone,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.themeColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -267,44 +610,34 @@ class _AdminTechniciansScreenState
     );
   }
 
-  Widget _buildErrorState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
-            const SizedBox(height: 12),
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: _fetchTechnicians,
-              child: const Text('Coba Lagi'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(40),
+        padding: const EdgeInsets.symmetric(vertical: 40),
         child: Column(
           children: [
-            Icon(Icons.engineering_outlined, size: 48, color: AppColors.textMuted),
-            SizedBox(height: 12),
+            Icon(
+              Icons.group_outlined,
+              size: 80,
+              color: context.themeColors.textMuted.withOpacity(0.2),
+            ),
+            const SizedBox(height: 24),
             Text(
-              'Belum ada data teknisi',
+              'Belum ada teknisi di area ini',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: context.themeColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Tidak ada teknisi yang ditugaskan di area kerja Anda',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: context.themeColors.textSecondary,
               ),
             ),
           ],
