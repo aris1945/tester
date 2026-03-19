@@ -9,6 +9,7 @@ android {
     namespace = "com.dompis.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    archivesBaseName = 'Dompis-v' + defaultConfig.versionName
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
